@@ -13,11 +13,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.15
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '25.9'
+          node-version: '20'
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
@@ -51,7 +51,12 @@ jobs:
           EOF
           chmod 600 ~/.ssh/config
 
-      - name: Deploy
+      - name: Debug cloudflared connection
+        env:
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
-          rsync -avz --delete --chmod=D755,F644 \
-            ./dist/ deploy-target:/
+          echo "=== Verify Cloudflare Access accepts the service token ==="
+          curl -sS -o /tmp/cf-identity.txt -w "HTTP %{http_code}\n" \
+            -H "CF-Access-Cl
