@@ -1,8 +1,14 @@
 ---
 import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import Footer from '../components/Footer.astro';
+import PostEntry from '../components/PostEntry.astro';
+import { SITE_TITLE, SITE_DESCRIPTION, SOCIALS } from '../consts';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 5);
 ---
 
 <!doctype html>
@@ -12,38 +18,92 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	</head>
 	<body>
 		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+		<main class="main">
+			<section class="first-entry home-info">
+				<header class="entry-header">
+					<h1>hi, I'm Drew</h1>
+				</header>
+				<div class="entry-content">
+					<p>
+						I write about things I'm building and breaking — currently a CHIP-8
+						emulator in Rust, plus occasional notes on homelab tinkering,
+						low-level systems, and security.
+					</p>
+				</div>
+				<footer class="entry-footer social-icons">
+					{SOCIALS.map((s) => (
+						<a
+							href={s.url}
+							target={s.url.startsWith('http') ? '_blank' : undefined}
+							rel={s.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+							aria-label={s.label}
+						>
+							{s.label}
+						</a>
+					))}
+				</footer>
+			</section>
+
+			<section class="post-list">
+				{posts.map((post) => (
+					<PostEntry
+						href={`/blog/${post.id}/`}
+						title={post.data.title}
+						description={post.data.description}
+						pubDate={post.data.pubDate}
+						body={post.body}
+					/>
+				))}
+			</section>
 		</main>
 		<Footer />
+
+		<style>
+			.main {
+				max-width: calc(var(--main-width) + var(--gap) * 2);
+				margin: auto;
+				padding: var(--gap);
+			}
+			.first-entry {
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				min-height: 320px;
+				margin: var(--gap) 0;
+			}
+			.first-entry .entry-header h1 {
+				font-size: 34px;
+				font-weight: 700;
+				line-height: 1.3;
+				margin: 0;
+				color: var(--primary);
+			}
+			.first-entry .entry-content {
+				margin: 14px 0;
+				font-size: 16px;
+				color: var(--secondary);
+			}
+			.first-entry .entry-content p {
+				margin: 0;
+			}
+			.social-icons {
+				display: flex;
+				gap: 18px;
+				flex-wrap: wrap;
+				font-size: 14px;
+			}
+			.social-icons a {
+				color: var(--secondary);
+				text-decoration: underline;
+				text-underline-offset: 0.25rem;
+			}
+			.social-icons a:hover {
+				color: var(--primary);
+			}
+			.post-list {
+				margin-top: 32px;
+			}
+		</style>
 	</body>
 </html>

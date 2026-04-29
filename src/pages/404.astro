@@ -1,0 +1,53 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<!doctype html>
+<html lang="en">
+	<head><BaseHead title="404" description="Lost in the void" /></head>
+	<body>
+		<Header />
+		<main class="main not-found">
+			<h1>0x404</h1>
+			<p>page not found</p>
+			<a href="/">← home</a>
+		</main>
+		<Footer />
+
+		<style>
+			.main {
+				max-width: calc(var(--main-width) + var(--gap) * 2);
+				margin: auto;
+				padding: var(--gap);
+			}
+			.not-found {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				min-height: calc(100vh - var(--header-height) - var(--footer-height));
+				text-align: center;
+			}
+			.not-found h1 {
+				font-family: var(--font-mono);
+				font-size: 64px;
+				margin: 0 0 12px;
+				color: var(--primary);
+			}
+			.not-found p {
+				color: var(--secondary);
+				margin: 0 0 16px;
+			}
+			.not-found a {
+				color: var(--secondary);
+				text-decoration: underline;
+				text-underline-offset: 0.25rem;
+			}
+			.not-found a:hover {
+				color: var(--primary);
+			}
+		</style>
+	</body>
+</html>

@@ -1,0 +1,68 @@
+---
+import FormattedDate from './FormattedDate.astro';
+
+interface Props {
+	href: string;
+	title: string;
+	description?: string;
+	pubDate: Date;
+	body?: string;
+}
+
+const { href, title, description, pubDate, body } = Astro.props;
+const wordCount = body ? body.trim().split(/\s+/).length : 0;
+const readingTime = Math.max(1, Math.round(wordCount / 220));
+---
+
+<article class="post-entry">
+	<h2 class="entry-header">{title}</h2>
+	{description && <p class="entry-content">{description}</p>}
+	<footer class="entry-footer">
+		<FormattedDate date={pubDate} />
+		{wordCount > 0 && <> · {readingTime} min</>}
+	</footer>
+	<a class="entry-link" href={href} aria-label={title}></a>
+</article>
+
+<style>
+	.post-entry {
+		position: relative;
+		margin-bottom: var(--gap);
+		padding: var(--gap);
+		background: var(--entry);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		transition: transform 0.2s, border-color 0.2s;
+	}
+	.post-entry:hover {
+		transform: translateY(-2px);
+		border-color: var(--tertiary);
+	}
+	.entry-header {
+		margin: 0 0 8px;
+		color: var(--primary);
+		font-size: 24px;
+		font-weight: 700;
+		line-height: 1.3;
+	}
+	.entry-content {
+		margin: 8px 0;
+		color: var(--secondary);
+		font-size: 14px;
+		line-height: 1.6;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.entry-footer {
+		margin-top: 8px;
+		color: var(--secondary);
+		font-size: 13px;
+	}
+	.entry-link {
+		position: absolute;
+		inset: 0;
+		border-radius: var(--radius);
+	}
+</style>
