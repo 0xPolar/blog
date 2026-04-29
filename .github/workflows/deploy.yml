@@ -59,4 +59,23 @@ jobs:
         run: |
           echo "=== Verify Cloudflare Access accepts the service token ==="
           curl -sS -o /tmp/cf-identity.txt -w "HTTP %{http_code}\n" \
-            -H "CF-Access-Cl
+            -H "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID" \
+            -H "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET" \
+            "https://${SSH_HOST}/cdn-cgi/access/get-identity" || true
+          echo "--- Response body (first 20 lines) ---"
+          head -20 /tmp/cf-identity.txt || true
+          echo
+          echo "=== cloudflared access ssh debug output ==="
+          timeout 15 cloudflared access ssh \
+            --hostname "$SSH_HOST" \
+            --service-token-id "$CF_ACCESS_CLIENT_ID" \
+            --service-token-secret "$CF_ACCESS_CLIENT_SECRET" \
+            --loglevel debug 2>&1 | head -60 || true
+          echo
+          echo "=== Verbose SSH connection attempt ==="
+          ssh -vvv -o ConnectTimeout=20 deploy-target "echo SSH_OK" 2>&1 | tail -60 || true
+
+      - name: Deploy
+        run: |
+          rsync -avz --delete --chmod=D755,F644 \
+            ./dist/ deploy-target:/
