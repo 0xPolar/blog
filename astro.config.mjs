@@ -5,7 +5,7 @@ import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: 'https://blog.yourdomain.com',
+  site: 'https://blog.aoaknode.xyz',
   integrations: [mdx(), sitemap(), react()],
   vite: {
     plugins: [tailwindcss()],

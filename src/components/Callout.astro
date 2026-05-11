@@ -1,0 +1,77 @@
+---
+type CalloutType = 'note' | 'tip' | 'important' | 'warning' | 'caution' | 'tldr';
+
+interface Props {
+  type?: CalloutType;
+  title?: string;
+}
+
+const { type = 'note', title } = Astro.props;
+
+const ICONS: Record<CalloutType, string> = {
+  note: 'ℹ',
+  tip: '💡',
+  important: '★',
+  warning: '⚠',
+  caution: '⛔',
+  tldr: '📝',
+};
+
+const DEFAULT_TITLES: Record<CalloutType, string> = {
+  note: 'Note',
+  tip: 'Tip',
+  important: 'Important',
+  warning: 'Warning',
+  caution: 'Caution',
+  tldr: 'TL;DR',
+};
+
+const heading = title ?? DEFAULT_TITLES[type];
+---
+
+<aside class={`callout callout-${type}`} role="note">
+  <p class="callout-title">
+    <span class="callout-icon" aria-hidden="true">{ICONS[type]}</span>
+    <span>{heading}</span>
+  </p>
+  <div class="callout-body">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .callout {
+    margin: 20px 0;
+    padding: 12px 16px;
+    border-inline-start: 4px solid var(--callout-accent);
+    border-radius: var(--radius);
+    background: var(--callout-bg);
+    color: var(--content);
+  }
+  .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+    color: var(--callout-accent);
+  }
+  .callout-icon { font-size: 1.05em; line-height: 1; }
+  .callout-body :global(:first-child) { margin-top: 0; }
+  .callout-body :global(:last-child) { margin-bottom: 0; }
+
+  .callout-note     { --callout-accent: #2563eb; --callout-bg: #2563eb14; }
+  .callout-tip      { --callout-accent: #16a34a; --callout-bg: #16a34a14; }
+  .callout-important { --callout-accent: #9333ea; --callout-bg: #9333ea14; }
+  .callout-warning  { --callout-accent: #d97706; --callout-bg: #d9770614; }
+  .callout-caution  { --callout-accent: #dc2626; --callout-bg: #dc262614; }
+  .callout-tldr     { --callout-accent: #0d9488; --callout-bg: #0d948814; }
+  .callout-tldr     { border-inline-start-width: 6px; }
+
+  :global(:root[data-theme="dark"]) .callout-note     { --callout-accent: #60a5fa; --callout-bg: #60a5fa1f; }
+  :global(:root[data-theme="dark"]) .callout-tip      { --callout-accent: #4ade80; --callout-bg: #4ade801f; }
+  :global(:root[data-theme="dark"]) .callout-important { --callout-accent: #c084fc; --callout-bg: #c084fc1f; }
+  :global(:root[data-theme="dark"]) .callout-warning  { --callout-accent: #fbbf24; --callout-bg: #fbbf241f; }
+  :global(:root[data-theme="dark"]) .callout-caution  { --callout-accent: #f87171; --callout-bg: #f871711f; }
+  :global(:root[data-theme="dark"]) .callout-tldr     { --callout-accent: #2dd4bf; --callout-bg: #2dd4bf1f; }
+</style>

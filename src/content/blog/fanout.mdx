@@ -1,0 +1,107 @@
+---
+title: "Fanout on write vs fanout on read: building a Twitter feed service"
+description: ""
+pubDate: "Apr 28 2026"
+---
+
+import Callout from "@components/Callout.astro";
+import FanOutComparison from "@components/FanOutComparison";
+import ArchitectureFlow from "@components/ArchitectureFlow";
+import CelebrityScaling from "@components/CelebrityScaling";
+
+<Callout type="tldr">
+  Fanout-on-write makes reads cheap and writes painful. For a Twitter-style feed
+  where reads outnumber writes 100:1, that's the right trade — until a celebrity
+  tweets to 10 million followers. Here's what I built, what broke, and what I'd
+  change.
+</Callout>
+
+Over the last few weeks, I've been working on a backend system that emulates the
+core of Twitter including services such as user management, posting tweets and
+following other users. One of the most interesting challenges I faced was
+implementing the feed service.
+
+This post will explore the tradeoff between two common approaches to building a feed service: fanout on write and fanout on read, and explains why I chose to implement fanout on write for my Twitter feed, what the benefits and drawbacks of this approach are, how it compares to fanout on read, and what changes I would make if I had to do it again.
+
+## The Problem
+
+When users open their Twitter feed, they expect to see the latest tweets from the users they follow. To achieve this, the feed service needs to efficiently retrieve and aggregate tweets from multiple sources (the users they follow), in chronological order, and present them in a timely manner.
+
+The SQL query to retrieve a user's feed might look something like this:
+
+```sql
+SELECT * FROM tweets
+WHERE author_id IN (SELECT followee_id FROM follows WHERE follower_id = ?)
+ORDER BY created_at DESC
+LIMIT 50;
+```
+
+Now this works but it starts to fail when services get increased traffic, let's look at why and what can be done.
+
+### Approach 1: Fanout On Read
+
+The query above is the fanout on read pattern. Every time a user requests their feed, the database makes a request for all of the accounts a users follows, gathers their recent tweets, sorts them and returns a slice.
+
+Benefits:
+
+- **Simplicity**, it's one query with no background workers and no caches that need to be invalidated.
+- **Storage**, there is no additional storage required for maintaining a users feed.
+- **Write Cheap**, when a user posts a tweet, the system only needs to insert the tweet into the database, not update multiple feed tables.
+
+Drawbacks:
+
+- **Expensive reads**, as a user grows to follow more accounts the reads to curate a users feed grow more expensive
+- **Expensive reads**, the cost to the system for reading a users feed is paid every single time a user opens the app, even if there is no new information.
+- **Caching is hard**, the feed is personal so you can't share a cached result across users, and any new tweet from anyone the user follows invalidates the current cache
+
+The pattern that breaks fanout on read the worst is the one that is the most common with this type of app. That is social media platforms where users read from their feed far more often than they post to it cause problems with fanout on read, reads can grow to be extremely expensive while writes are cheap, the opposite direction of optimization we would want in an app like this where we can assume users will be reading from their feed at a ratio of 100 to 1 to writes, for every time a user posts a tweet we expect them to read 100 tweets.
+
+<FanOutComparison client:visible />
+
+### Approach 2: Fanout On Write
+
+Fanout on write inverts the cost. When a user posts a tweet, the system does the work figuring out who should see it and pushes the tweet ID into each followers pre-computed feed. When a follower opens their feed the answer is already sitting there waiting, usually a data structure like a Redis list is used as their read is essentially free.
+
+What the flow looked like in my project:
+
+1. The Tweet service writes the new tweet to Postgres and publishes a tweet.created event to RabbitMQ.
+2. A Go worker (the Tweet worker) consumes the event.
+3. The worker calls the User service over gRPC to fetch the author's followers.
+4. For each follower, the worker pushes the new tweet's ID into that follower's feed queue in RabbitMQ, which the feed service then materializes into a Redis list keyed by user ID.
+5. When a user opens their feed, the Feed service reads the pre-computed list of tweet IDs from Redis and hydrates them by fetching the tweet details from Postgres, then returns the feed to the user.
+
+The read path is now a Redis lookup plus a batch fetch by ID. Which is cheap and predictable, regardless of how many accounts the user follows.
+
+<ArchitectureFlow client:visible />
+
+#### What this costs
+
+Fanout on write is not free. It moves the costs rather than eliminating them.
+
+**Writes are now expensive.** A tweet from a user with 1,000 followers triggers 1,000 inserts into 1,000 feeds and, a tweet from a user with 10 million followers, like from a celebrity, triggers 10 million inserts into 10 million feeds. This is the famous "Justin Bieber problem" where a single tweet from a celebrity can cause a huge spike in write traffic and this is the reason why Twitter uses a hybrid approach where they fanout on write for users with a small number of followers and fanout on read for users with a large number of followers.
+
+<CelebrityScaling client:visible />
+
+**Storage is more expensive**, Every tweet ID is now duplicated across every follower's feed. If the average user has 200 followers, you've got 200x the storage for feed data compared to fanout on read. In practice you can mitigate this by only storing the tweet ID in the feed and fetching the details on read, but it still adds up.
+
+**The System becomes eventually consistent.** When a user posts a tweet, it doesn't appear in their followers' feeds immediately. There is a delay while the background worker processes the event and updates the followers' feeds, which can take seconds or even minutes during high traffic. This can lead to a poor user experience, especially for users with a large number of followers.
+
+**Complexity increases.** The system now has more moving parts, including background workers, message queues, and cache invalidation logic. This increases the complexity of the system and can make it harder to maintain and debug. Whereas with fanout on read, the logic is contained within a single query and there are fewer components to manage.
+
+#### Why I chose fanout on write anyway
+
+To be honest, the first reason why I chose fanout on write was because I wanted to learn. Fanout on write is more complex and interesting design as it involves implementing message brokers, background workers, and cache management, which are all valuable skills to learn. I also wanted to experience the tradeoffs firsthand and see how it performs under load.
+
+The second reason is that I expect the read to write ratio to be very high, around 100:1, this makes fanout on write a better fit for this app. The cost of expensive writes is outweighed by the benefit of cheap reads, which is crucial for a feed service where users will be reading from their feed much more often than posting to it.
+
+### What I would do differently
+
+**I'd probably implement a hybrid approach.** Like Twitter does, where I fanout on write for users with a small number of followers and fanout on read for users with a large number of followers. This would allow me to optimize for the common case of users with a small number of followers while still handling the edge case of celebrities with millions of followers without overwhelming the system with expensive writes.
+
+**I'd enforce strict orders on the background worker.** In my implementation, the background worker processes events in parallel, which can lead to out-of-order updates to followers' feeds. This can cause confusion for users if they see tweets appearing in their feed in a non-chronological order. To fix this, I would implement a mechanism to ensure that events are processed in the order they were created, such as using a single worker or implementing a priority queue.
+
+**I'd implement better monitoring and alerting.** With the increased complexity of the system, it's important to have robust monitoring and alerting in place to quickly identify and address issues. I would set up metrics to track the performance of the background worker, the message queue, and the feed service, as well as alerts for any failures or performance degradation.
+
+## Closing Thoughts
+
+The feed service for my Twitter backend clone was an interesting design because the tradeoffs between fanout on write and fanout on read are not clear cut, and the best choice depends on the specific requirements and constraints of the application. In my case, I chose fanout on write because I expected a high read-to-write ratio and wanted to optimize for fast reads, but I also learned that this approach comes with its own set of challenges and costs. If I were to do it again, I would consider implementing a hybrid approach to balance the benefits and drawbacks of both patterns.

@@ -1,63 +1,129 @@
 ---
-import AboutHeroImage from '../assets/blog-placeholder-about.jpg';
-import Layout from '../layouts/BlogPost.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SOCIALS } from '../consts';
 ---
 
-<Layout
-	title="About Me"
-	description="Lorem ipsum dolor sit amet"
-	pubDate={new Date('August 08 2021')}
-	heroImage={AboutHeroImage}
->
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-		labore et dolore magna aliqua. Vitae ultricies leo integer malesuada nunc vel risus commodo
-		viverra. Adipiscing enim eu turpis egestas pretium. Euismod elementum nisi quis eleifend quam
-		adipiscing. In hac habitasse platea dictumst vestibulum. Sagittis purus sit amet volutpat. Netus
-		et malesuada fames ac turpis egestas. Eget magna fermentum iaculis eu non diam phasellus
-		vestibulum lorem. Varius sit amet mattis vulputate enim. Habitasse platea dictumst quisque
-		sagittis. Integer quis auctor elit sed vulputate mi. Dictumst quisque sagittis purus sit amet.
-	</p>
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title="About" description="A bit about Drew — what I build, what I break, and what I'm currently obsessing over." />
+	</head>
+	<body>
+		<Header />
+		<main class="main">
+			<article class="about">
+				<header class="about-header">
+					<h1>About</h1>
+				</header>
 
-	<p>
-		Morbi tristique senectus et netus. Id semper risus in hendrerit gravida rutrum quisque non
-		tellus. Habitasse platea dictumst quisque sagittis purus sit amet. Tellus molestie nunc non
-		blandit massa. Cursus vitae congue mauris rhoncus. Accumsan tortor posuere ac ut. Fringilla urna
-		porttitor rhoncus dolor. Elit ullamcorper dignissim cras tincidunt lobortis. In cursus turpis
-		massa tincidunt dui ut ornare lectus. Integer feugiat scelerisque varius morbi enim nunc.
-		Bibendum neque egestas congue quisque egestas diam. Cras ornare arcu dui vivamus arcu felis
-		bibendum. Dignissim suspendisse in est ante in nibh mauris. Sed tempus urna et pharetra pharetra
-		massa massa ultricies mi.
-	</p>
+				<div class="about-content">
+					<p>
+						Hi, I'm Drew. I write code across the stack but spend most of my
+						free time near the bottom of it — emulators, databases, backends,
+						and the homelab humming away in the next room.
+					</p>
 
-	<p>
-		Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam sit amet nisl
-		suscipit. Lacus viverra vitae congue eu consequat ac felis donec. Egestas integer eget aliquet
-		nibh praesent tristique magna sit amet. Eget magna fermentum iaculis eu non diam. In vitae
-		turpis massa sed elementum. Tristique et egestas quis ipsum suspendisse ultrices. Eget lorem
-		dolor sed viverra ipsum. Vel turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat
-		semper viverra nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus
-		vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim praesent elementum
-		facilisis. Ultrices tincidunt arcu non sodales neque. Tempus egestas sed sed risus pretium quam
-		vulputate. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fringilla
-		urna porttitor rhoncus dolor purus non. Amet dictum sit amet justo donec enim.
-	</p>
+					<p>
+						Right now I'm building a <strong>CHIP-8 emulator in Rust</strong>,
+						which is my excuse to keep poking at low-level systems and the kind
+						of bugs that don't show up in a stack trace. Before that I built
+						<strong>godbms</strong>, a database from scratch in Go, and
+						<strong>beaver</strong>, a Go service for backing the database up. I
+						like understanding things by rebuilding them.
+					</p>
 
-	<p>
-		Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut consequat semper
-		viverra. Tellus mauris a diam maecenas sed enim ut sem viverra. Venenatis urna cursus eget nunc
-		scelerisque viverra mauris in. Arcu ac tortor dignissim convallis aenean et tortor at. Curabitur
-		gravida arcu ac tortor dignissim convallis aenean et tortor. Egestas tellus rutrum tellus
-		pellentesque eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim
-		blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices tincidunt arcu. Id
-		cursus metus aliquam eleifend mi.
-	</p>
+					<p>
+						On the distributed-systems side I built a
+						<strong>Twitter-style microservice in Python</strong> to dig into
+						the fanout-on-write vs fanout-on-read tradeoff — there's a writeup
+						on that in the posts. I also wrote
+						<strong>cloudarr</strong>, a Go tool that backs my homelab media off
+						to cloud storage, and a handful of smaller things like
+						<strong>browser-grep</strong>, a TypeScript extension for searching
+						across open tabs.
+					</p>
 
-	<p>
-		Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus imperdiet. Id porta
-		nibh venenatis cras sed felis eget velit. Ipsum a arcu cursus vitae. Facilisis magna etiam
-		tempor orci eu lobortis elementum. Tincidunt dui ut ornare lectus sit. Quisque non tellus orci
-		ac. Blandit libero volutpat sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar
-		proin gravida. Egestas integer eget aliquet nibh praesent tristique magna.
-	</p>
-</Layout>
+					<!-- <p>
+						The rest of my time goes to the homelab — Proxmox, LXC containers,
+						a Minecraft-on-demand setup, and the occasional self-inflicted
+						outage when I flip a container from unprivileged to privileged
+						without thinking it through. Those make for good posts.
+					</p> -->
+
+					<p>
+						This blog is where I write about the things I'm building and
+						breaking. Expect notes on Rust, Go, databases, distributed systems,
+						homelab tinkering, and a bit of security. If any of that sounds
+						interesting, the posts page is probably a better starting point
+						than this one.
+					</p>
+				</div>
+
+				<footer class="about-footer social-icons">
+					{SOCIALS.map((s) => (
+						<a
+							href={s.url}
+							target={s.url.startsWith('http') ? '_blank' : undefined}
+							rel={s.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+							aria-label={s.label}
+						>
+							{s.label}
+						</a>
+					))}
+				</footer>
+			</article>
+		</main>
+		<Footer />
+
+		<style>
+			.main {
+				max-width: calc(var(--main-width) + var(--gap) * 2);
+				margin: auto;
+				padding: var(--gap);
+			}
+			.about-header {
+				margin: 24px auto 24px;
+			}
+			.about-header h1 {
+				margin: 0;
+				font-size: 40px;
+				font-weight: 700;
+				line-height: 1.2;
+				color: var(--primary);
+			}
+			.about-content p {
+				font-size: 16px;
+				line-height: 1.7;
+				color: var(--primary);
+				margin: 0 0 18px;
+			}
+			.about-content strong {
+				color: var(--primary);
+				font-weight: 600;
+			}
+			.about-footer {
+				margin-top: 28px;
+			}
+			.social-icons {
+				display: flex;
+				gap: 18px;
+				flex-wrap: wrap;
+				font-size: 14px;
+			}
+			.social-icons a {
+				color: var(--secondary);
+				text-decoration: underline;
+				text-underline-offset: 0.25rem;
+			}
+			.social-icons a:hover {
+				color: var(--primary);
+			}
+
+			@media (max-width: 800px) {
+				.about-header h1 { font-size: 28px; }
+			}
+		</style>
+	</body>
+</html>
