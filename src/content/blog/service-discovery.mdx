@@ -36,6 +36,20 @@ async def get_product(product_id: int) -> dict:
     return response.json()
 ```
 
+Benefits:
+
+- **Simple to understand and implement**,
+- **No dependency on external systems**,
+- **Easy to debug**,
+
+Drawbacks:
+
+- **XXX**Brittle in dynamic environments: containers and pods restart with new addresses.
+- **XXX**No health awareness: the URL can still resolve even if the service is unhealthy.
+- **XXX**Poor scaling story: multiple replicas require extra load-balancing logic.
+- **XXX**Manual configuration grows messy: every new service or environment adds more URLs to manage.
+- **XXX**Bad failure behavior by default: one dead upstream can cause the gateway to return a full error.,
+
 ### Approach 2: Consul
 
 Consul is a popular service discovery tool that provides a distributed key-value store and a service registry. It allows services to register themselves and discover other services in the cluster. I implemented service discovery using Consul by having each service register itself with Consul when it starts up, and then using Consul's API to discover other services when needed.
