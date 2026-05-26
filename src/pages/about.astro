@@ -3,6 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SOCIALS } from '../consts';
+import BookShelf from '../components/reading/BookShelf.astro';
 ---
 
 <!doctype html>
@@ -60,6 +61,8 @@ import { SOCIALS } from '../consts';
 						than this one.
 					</p>
 				</div>
+
+				<BookShelf />
 
 				<footer class="about-footer social-icons">
 					{SOCIALS.map((s) => (

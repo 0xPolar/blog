@@ -1,0 +1,171 @@
+[
+	{
+		"series_id": 27,
+		"chapter_id": 28,
+		"volume_id": 27,
+		"library_id": 1,
+		"title": "Database Internals _ A Deep Dive Into How Distributed Data Systems Work (2019)",
+		"series_name": "Alex Petrov",
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=28&apiKey=CBGlNrxYVCD796jP",
+		"pages": 371,
+		"pages_read": 21,
+		"progress_pct": 5.660377358490567,
+		"last_read_utc": "2026-05-13T18:47:01.8842218Z",
+		"release_date": "0001-01-01T00:00:00Z"
+	},
+	{
+		"series_id": 3,
+		"chapter_id": 3,
+		"volume_id": 3,
+		"library_id": 1,
+		"title": "But How Do It Know?",
+		"series_name": "But How Do It Know?",
+		"authors": [
+			"J. Clark Scott"
+		],
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=3&apiKey=CBGlNrxYVCD796jP",
+		"pages": 221,
+		"pages_read": 122,
+		"progress_pct": 55.203619909502265,
+		"last_read_utc": "2026-05-13T14:07:27.9305277Z",
+		"release_date": "2018-08-13T00:00:00Z",
+		"language": "en"
+	},
+	{
+		"series_id": 6,
+		"chapter_id": 6,
+		"volume_id": 6,
+		"library_id": 1,
+		"title": "Operating systems _ three easy pieces (2018)",
+		"series_name": "Remzi H. Arpaci-Dusseau; Andrea C Arpaci-Dusseau",
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=6&apiKey=CBGlNrxYVCD796jP",
+		"pages": 709,
+		"pages_read": 2,
+		"progress_pct": 0.2820874471086037,
+		"last_read_utc": "2026-05-08T14:34:59.4698708Z",
+		"release_date": "0001-01-01T00:00:00Z"
+	},
+	{
+		"series_id": 22,
+		"chapter_id": 22,
+		"volume_id": 22,
+		"library_id": 1,
+		"title": "System Design Interview_ An insider's guide_ Step by Step Guide, Tips and 15 System Design Interview Questions with Detailed Solutions (2020)",
+		"series_name": "Alex Xu",
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=22&apiKey=CBGlNrxYVCD796jP",
+		"pages": 268,
+		"pages_read": 8,
+		"progress_pct": 2.9850746268656714,
+		"last_read_utc": "2026-04-25T20:57:58.4622421Z",
+		"release_date": "0001-01-01T00:00:00Z"
+	},
+	{
+		"series_id": 14,
+		"chapter_id": 14,
+		"volume_id": 14,
+		"library_id": 1,
+		"title": "Designing Data-Intensive Applications",
+		"series_name": "Designing Data-Intensive Applications",
+		"authors": [
+			"Martin Kleppmann"
+		],
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=14&apiKey=CBGlNrxYVCD796jP",
+		"pages": 613,
+		"pages_read": 124,
+		"progress_pct": 20.22838499184339,
+		"last_read_utc": "2026-04-20T01:03:47.3192847Z",
+		"release_date": "2017-03-01T00:00:00Z"
+	},
+	{
+		"series_id": 18,
+		"chapter_id": 18,
+		"volume_id": 18,
+		"library_id": 1,
+		"title": "Clean_Code_A_Handbook of Agile Software Craftsmanship",
+		"series_name": "Robert C. Martin",
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=18&apiKey=CBGlNrxYVCD796jP",
+		"pages": 462,
+		"pages_read": 20,
+		"progress_pct": 4.329004329004329,
+		"last_read_utc": "2026-04-17T16:35:32.9892138Z",
+		"release_date": "2008-09-15T00:00:00Z"
+	},
+	{
+		"series_id": 11,
+		"chapter_id": 11,
+		"volume_id": 11,
+		"library_id": 1,
+		"title": "Coding Interview Patterns_ Nail Your Next Coding Interview (2024)",
+		"series_name": "Alex Xu, Shaun Gunawardane",
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=11&apiKey=CBGlNrxYVCD796jP",
+		"pages": 437,
+		"pages_read": 36,
+		"progress_pct": 8.237986270022883,
+		"last_read_utc": "2026-04-16T14:02:02.2264524Z",
+		"release_date": "0001-01-01T00:00:00Z"
+	},
+	{
+		"series_id": 19,
+		"chapter_id": 19,
+		"volume_id": 19,
+		"library_id": 1,
+		"title": "Alice in Wonderland ; Through the looking-glass, etc.",
+		"series_name": "Alice in Wonderland ; Through the looking-glass, etc.",
+		"authors": [
+			"1832-1898",
+			"Carroll",
+			"Lewis"
+		],
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=19&apiKey=CBGlNrxYVCD796jP",
+		"pages": 360,
+		"pages_read": 9,
+		"progress_pct": 2.5,
+		"last_read_utc": "2026-04-16T13:53:31.6081625Z",
+		"release_date": "2019-01-29T00:00:00Z"
+	},
+	{
+		"series_id": 17,
+		"chapter_id": 17,
+		"volume_id": 17,
+		"library_id": 1,
+		"title": "A Christmas Carol Coloring Book",
+		"series_name": "Adobe Acrobat",
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=17&apiKey=CBGlNrxYVCD796jP",
+		"pages": 51,
+		"pages_read": 3,
+		"progress_pct": 5.88235294117647,
+		"last_read_utc": "2026-04-16T13:52:56.408056Z",
+		"release_date": "0001-01-01T00:00:00Z"
+	},
+	{
+		"series_id": 21,
+		"chapter_id": 21,
+		"volume_id": 21,
+		"library_id": 1,
+		"title": "Computer_Systems_A_Programmer_Perspective_3rd_ (2015)",
+		"series_name": "Computer Systems A Programmer Perspective",
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=21&apiKey=CBGlNrxYVCD796jP",
+		"pages": 1120,
+		"pages_read": 17,
+		"progress_pct": 1.5178571428571428,
+		"last_read_utc": "2026-04-16T01:17:54.052271Z",
+		"release_date": "2015-10-21T00:00:00Z"
+	},
+	{
+		"series_id": 16,
+		"chapter_id": 16,
+		"volume_id": 16,
+		"library_id": 1,
+		"title": "Build Your Own Database From Scratch in Go",
+		"series_name": "Build Your Own Database From Scratch in Go",
+		"authors": [
+			"James Smith"
+		],
+		"thumbnail": "https://kavita.aoaknode.xyz/api/Image/chapter-cover?chapterId=16&apiKey=CBGlNrxYVCD796jP",
+		"pages": 108,
+		"pages_read": 5,
+		"progress_pct": 4.62962962962963,
+		"last_read_utc": "2026-04-15T23:23:52.9596244Z",
+		"release_date": "2025-01-28T00:00:00Z"
+	}
+]
