@@ -18,37 +18,43 @@ Over the last week, I've been working on a small backend system to gain a deep u
 
 I chose this architecture as it was enough moving parts to make service discovery a challenge, but not so many that it would be overwhelming. In this post, I'll share what I learned about service discovery, the challenges I faced, and how I implemented it using both Consul and Kubernetes.
 
+## The Problem
+
+In a monolith, function calls are just function calls. In a microservice system, those calls become network requests, and every request needs an address. The order service does not just need to know that a product service exists, it needs to know where a healthy instance of that service is right now.
+
+That gets awkward quickly because service addresses are not stable. Containers restart, ports change, replicas are added and removed, and a local Docker Compose setup behaves differently from a Kubernetes cluster. The question becomes: how does one service find another service without every address being manually wired together?
+
 ### Approach 1: Hardcoding Service Addresses
 
-In microservices each service needs to know how to find each other, the niave approach to this problem is to hardcode the addresses of each service.
+In microservices each service needs to know how to find the others. The naive approach to this problem is to hardcode the addresses of each service.
 
 ```python
-CATALOG_URL = os.getenv("CATALOG_URL", "192.168.1.100:8001")
-INVENTORY_URL = os.getenv("INVENTORY_URL", "192.168.1.101:8002")
+USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "192.168.1.100:8001")
+PRODUCT_SERVICE_URL = os.getenv("PRODUCT_SERVICE_URL", "192.168.1.101:8002")
 ```
 
 Then when the order service needs to call the product service, it can use the hardcoded address:
 
 ```python
 async def get_product(product_id: int) -> dict:
-    response = await httpx.get(f"http://{CATALOG_URL}/products/{product_id}")
+    response = await httpx.get(f"http://{PRODUCT_SERVICE_URL}/products/{product_id}")
     response.raise_for_status()
     return response.json()
 ```
 
 Benefits:
 
-- **Simple to understand and implement**,
-- **No dependency on external systems**,
-- **Easy to debug**,
+- **Simple to understand and implement**, there is no extra infrastructure or discovery client involved.
+- **No dependency on external systems**, each service only needs its configured URL.
+- **Easy to debug**, because the address being called is visible in the environment.
 
 Drawbacks:
 
-- **XXX**Brittle in dynamic environments: containers and pods restart with new addresses.
-- **XXX**No health awareness: the URL can still resolve even if the service is unhealthy.
-- **XXX**Poor scaling story: multiple replicas require extra load-balancing logic.
-- **XXX**Manual configuration grows messy: every new service or environment adds more URLs to manage.
-- **XXX**Bad failure behavior by default: one dead upstream can cause the gateway to return a full error.,
+- **Brittle in dynamic environments**, containers and pods restart with new addresses.
+- **No health awareness**, the URL can still resolve even if the service is unhealthy.
+- **Poor scaling story**, multiple replicas require extra load-balancing logic.
+- **Manual configuration grows messy**, every new service or environment adds more URLs to manage.
+- **Bad failure behavior by default**, one dead upstream can cause the order service to return a full error.
 
 ### Approach 2: Consul
 
@@ -91,8 +97,98 @@ async def discover_service(client: httpx.AsyncClient, name: str) -> str | None:
 
 Benefits:
 
-- **XXX**,
+- **Health-aware discovery**, the order service only asks Consul for instances passing their health checks.
+- **Works outside Kubernetes**, which made it useful while I was still running services locally in Docker.
+- **Explicit service registry**, it is easy to inspect which services are registered and what address Consul thinks they have.
+- **Multiple healthy instances**, Consul can return more than one passing service instance, which gives the client a place to add simple load balancing.
 
 Drawbacks:
 
-- **XXX**,
+- **Another system to run**, Consul itself now needs to be deployed, configured, and monitored.
+- **More application code**, each service needs registration logic and each caller needs discovery logic.
+- **Failure handling moves into the client**, the order service still has to decide what to do when Consul is down or returns no healthy instances.
+- **Service naming needs discipline**, otherwise the registry becomes another place where inconsistent names and environments can drift.
+
+What I liked about Consul was how visible the mechanism was. A service starts, registers itself, exposes a health check, and other services ask Consul for a healthy instance. That made the concept of service discovery very concrete.
+
+What I did not like was that the application had to know so much about discovery. The FastAPI code was not just making business requests anymore, it was also aware of the registry, health endpoint semantics, retries, and fallbacks.
+
+### Approach 3: Kubernetes Services
+
+Kubernetes handles service discovery differently. Instead of each application registering itself with an external registry, Kubernetes creates a stable Service object in front of a changing set of pods. The pods can come and go, but the service name stays stable.
+
+For the product service, the Kubernetes manifest looked roughly like this:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+spec:
+  selector:
+    app: product
+  ports:
+    - port: 8002
+      targetPort: 8002
+```
+
+Then the order service can call the product service using the Kubernetes DNS name:
+
+```python
+PRODUCT_SERVICE_URL = os.getenv(
+    "PRODUCT_SERVICE_URL",
+    "http://product-service:8002",
+)
+
+async def get_product(product_id: int) -> dict:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{PRODUCT_SERVICE_URL}/products/{product_id}")
+        response.raise_for_status()
+        return response.json()
+```
+
+In the same namespace, `product-service` resolves to the Kubernetes Service. If the product deployment has three healthy pods behind it, Kubernetes routes traffic to them without the order service needing to know their individual pod IPs.
+
+Benefits:
+
+- **The app code gets simpler**, the service can call a stable DNS name instead of querying a registry directly.
+- **Load balancing is built in**, Kubernetes routes traffic across matching healthy pods.
+- **Works naturally with scaling**, adding replicas does not require changing the caller.
+- **Discovery follows deployment configuration**, the service name, selector, and ports are all defined beside the rest of the infrastructure.
+
+Drawbacks:
+
+- **It ties discovery to Kubernetes**, which is great in-cluster but less helpful if some services run outside the cluster.
+- **YAML mistakes can be subtle**, a mismatched selector means the service exists but has no endpoints.
+- **Health still needs care**, readiness probes decide whether pods receive traffic, so bad probes create bad routing decisions.
+- **Local development can diverge**, a Docker Compose setup needs different service names or extra configuration to behave like the cluster.
+
+The biggest difference from Consul was that Kubernetes made discovery feel like infrastructure instead of application logic. The order service did not need to ask "where is the product service?" in code. It just called `http://product-service:8002`, and Kubernetes handled the moving pieces underneath.
+
+### Consul vs Kubernetes
+
+The interesting part of this project was not that one option was universally better than the other. It was that they solve the same problem at different layers.
+
+Consul made sense when I wanted explicit service registration and discovery across a more general environment. It would be a better fit if I had services spread across VMs, containers, and maybe multiple runtimes where Kubernetes was not the only source of truth.
+
+Kubernetes made sense once everything was already running in the cluster. At that point I did not need a separate discovery system for the basic service-to-service calls. Kubernetes already knew which pods existed, which ones were ready, and how to route to them.
+
+For this project, Kubernetes Services felt like the cleaner fit because the whole point of the exercise was learning Kubernetes with microservices. Consul taught me the mechanics. Kubernetes gave me the version I would actually reach for inside a cluster.
+
+### What I would do differently
+
+**I would standardize service names earlier.** I started with names like catalog, inventory, product, and user in different places while experimenting. That made the examples harder to reason about than they needed to be. Next time I would pick names once and use them across Docker Compose, Kubernetes manifests, environment variables, and docs.
+
+**I would add better timeout and retry behavior from the beginning.** Service discovery helps find a service, but it does not make network calls reliable. The calling service still needs timeouts, bounded retries, and a sensible response when an upstream service is unavailable.
+
+**I would treat health checks as part of the API.** A shallow `/health` endpoint that always returns 200 is not enough. For discovery to be useful, the health check should say whether the service is actually ready to handle requests.
+
+**I would keep local and cluster configuration closer together.** The more the local setup differs from Kubernetes, the easier it is to learn the wrong lesson. Docker Compose service names can get close to Kubernetes DNS names, and using that consistency would have made the project smoother.
+
+## Closing Thoughts
+
+Service discovery is one of those topics that sounds abstract until the first time a service moves and everything calling it breaks. Hardcoded addresses work just long enough to make the next step obvious.
+
+Consul helped me understand the service registry model: services register themselves, health checks decide what is usable, and callers ask for healthy instances. Kubernetes showed me the cluster-native version: stable service names in front of disposable pods.
+
+The main lesson I took from this project is that service discovery is not just about finding an address. It is about deciding where responsibility lives. With Consul, more of that responsibility sits in the application and registry. With Kubernetes, more of it sits in the platform. For this FastAPI project, once the services were running in Kubernetes, letting the platform own discovery was the simpler and cleaner choice.
