@@ -30,7 +30,7 @@ const booksJson = JSON.stringify(shelfBooks).replace(/</g, '\\u003c');
 
 {shelfBooks.length > 0 && (
   <section class="book-shelf" data-book-shelf data-show-progress={String(showReadingProgress)}>
-    <h2>On Deck</h2>
+    <h2>Currently Reading</h2>
     <div class="book-list">
       {shelfBooks.map((book, index) => {
         const title = cleanTitle(book.title);
@@ -74,7 +74,6 @@ const booksJson = JSON.stringify(shelfBooks).replace(/</g, '\\u003c');
               <div class="book-modal-progress-fill" data-book-modal-progress-fill></div>
             </div>
           </div>
-          <p class="book-modal-last-read" data-book-modal-last-read></p>
         </div>
       </div>
     </div>
@@ -99,13 +98,6 @@ const booksJson = JSON.stringify(shelfBooks).replace(/</g, '\\u003c');
     return book.series_name;
   };
 
-  const formatLastRead = (value) =>
-    new Date(value).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-
   document.querySelectorAll('[data-book-shelf]').forEach((shelf) => {
     const data = shelf.querySelector('[data-book-data]');
     const modal = shelf.querySelector('[data-book-modal]');
@@ -120,7 +112,6 @@ const booksJson = JSON.stringify(shelfBooks).replace(/</g, '\\u003c');
     const pages = modal.querySelector('[data-book-modal-pages]');
     const percent = modal.querySelector('[data-book-modal-percent]');
     const progressFill = modal.querySelector('[data-book-modal-progress-fill]');
-    const lastRead = modal.querySelector('[data-book-modal-last-read]');
 
     const closeModal = () => {
       modal.setAttribute('hidden', '');
@@ -139,7 +130,6 @@ const booksJson = JSON.stringify(shelfBooks).replace(/</g, '\\u003c');
       pages.textContent = `${book.pages_read} of ${book.pages} pages`;
       percent.textContent = `${Math.round(book.progress_pct)}%`;
       progressFill.style.width = `${book.progress_pct}%`;
-      lastRead.textContent = `Last read ${formatLastRead(book.last_read_utc)}`;
       progress.hidden = !showProgress;
 
       modal.removeAttribute('hidden');
@@ -360,11 +350,5 @@ const booksJson = JSON.stringify(shelfBooks).replace(/</g, '\\u003c');
     height: 100%;
     border-radius: 99px;
     background: #3b82f6;
-  }
-
-  .book-modal-last-read {
-    color: var(--secondary);
-    font-size: 12px;
-    margin: 0;
   }
 </style>
