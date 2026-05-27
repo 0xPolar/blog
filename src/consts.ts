@@ -2,7 +2,7 @@
 // You can import this data from anywhere in your site by using the `import` keyword.
 
 export const SITE_TITLE = "Drew's Blog";
-export const SITE_DESCRIPTION = 'Welcome to my Blog!';
+export const SITE_DESCRIPTION = 'Notes on backend systems, databases, infrastructure, and learning by building real projects.';
 
 export const NAV: { href: string; label: string }[] = [
 	{ href: '/', label: 'Home' },

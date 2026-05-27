@@ -3,63 +3,61 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SOCIALS } from '../consts';
+import BookShelf from '../components/reading/BookShelf.astro';
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title="About" description="A bit about Drew — what I build, what I break, and what I'm currently obsessing over." />
+		<BaseHead title="About" description="Drew writes about backend systems, databases, infrastructure, and the projects he builds to understand them." />
 	</head>
 	<body>
 		<Header />
 		<main class="main">
 			<article class="about">
 				<header class="about-header">
-					<h1>About</h1>
+					<h1>About me</h1>
 				</header>
 
 				<div class="about-content">
 					<p>
-						Hi, I'm Drew. I write code across the stack but spend most of my
-						free time near the bottom of it — emulators, databases, backends,
-						and the homelab humming away in the next room.
+						Hi, I'm Drew. I learn best by building the smallest real version of
+						the thing I am trying to understand, then following the questions it
+						creates.
 					</p>
 
 					<p>
-						Right now I'm building a <strong>CHIP-8 emulator in Rust</strong>,
-						which is my excuse to keep poking at low-level systems and the kind
-						of bugs that don't show up in a stack trace. Before that I built
-						<strong>godbms</strong>, a database from scratch in Go, and
-						<strong>beaver</strong>, a Go service for backing the database up. I
-						like understanding things by rebuilding them.
+						If I want to understand a database, I try to build one. If I want to
+						understand service discovery, I wire a few services together and see
+						where the clean diagram starts lying. That usually pulls me toward
+						backends, distributed systems, infrastructure, and the practical
+						details that make software behave in the real world.
 					</p>
 
 					<p>
-						On the distributed-systems side I built a
-						<strong>Twitter-style microservice in Python</strong> to dig into
-						the fanout-on-write vs fanout-on-read tradeoff — there's a writeup
-						on that in the posts. I also wrote
-						<strong>cloudarr</strong>, a Go tool that backs my homelab media off
-						to cloud storage, and a handful of smaller things like
-						<strong>browser-grep</strong>, a TypeScript extension for searching
-						across open tabs.
+						Some recent threads: a <strong>database from scratch in Go</strong>,
+						a <strong>Twitter-style feed service</strong> for poking at fanout
+						tradeoffs, and FastAPI microservices for learning service discovery
+						and Kubernetes. They are not perfect showcase projects. They are
+						working projects that make the tradeoffs harder to dodge.
 					</p>
 
-					<!-- <p>
-						The rest of my time goes to the homelab — Proxmox, LXC containers,
-						a Minecraft-on-demand setup, and the occasional self-inflicted
-						outage when I flip a container from unprivileged to privileged
-						without thinking it through. Those make for good posts.
-					</p> -->
+					<p>
+						I also spend a lot of time in my homelab. Proxmox, containers,
+						backups, media storage, and small self-hosted services have a nice
+						way of turning "I think I understand this" into "why is this down at
+						11pm?"
+					</p>
 
 					<p>
-						This blog is where I write about the things I'm building and
-						breaking. Expect notes on Rust, Go, databases, distributed systems,
-						homelab tinkering, and a bit of security. If any of that sounds
-						interesting, the posts page is probably a better starting point
-						than this one.
+						This blog is where I keep notes from that process. I write about
+						what I built, what confused me, what broke, and what I would do
+						differently next time. The useful part is usually the middle, before
+						everything has been cleaned up into a neat story.
 					</p>
 				</div>
+
+				<BookShelf />
 
 				<footer class="about-footer social-icons">
 					{SOCIALS.map((s) => (
