@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import type { Book } from './types';
-import BookCard from './BookCard';
-import BookModal from './BookModal';
+import { useEffect, useState } from "react";
+import BookCard from "./BookCard";
+import BookModal from "./BookModal";
+import type { Book } from "./types";
 
 interface Props {
   showReadingProgress?: boolean;
@@ -14,8 +14,8 @@ export default function BookShelf({ showReadingProgress = false }: Props) {
   const [selected, setSelected] = useState<Book | null>(null);
 
   useEffect(() => {
-    fetch('/books.json')
-      .then(r => r.json())
+    fetch("/books.json")
+      .then((r) => r.json())
       .then(setBooks)
       .catch(() => {});
   }, []);
@@ -23,29 +23,29 @@ export default function BookShelf({ showReadingProgress = false }: Props) {
   if (books.length === 0) return null;
 
   return (
-    <section style={{ marginTop: '32px' }}>
+    <section style={{ marginTop: "32px" }}>
       <h2
         style={{
-          color: 'var(--primary)',
-          fontSize: '18px',
+          color: "var(--primary)",
+          fontSize: "18px",
           fontWeight: 700,
-          margin: '0 0 16px',
+          margin: "0 0 16px",
           lineHeight: 1.2,
         }}
       >
-        On Deck
+        Currently Reading
       </h2>
       <div
         style={{
-          display: 'flex',
-          gap: '16px',
-          overflowX: 'auto',
-          paddingBottom: '12px',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'var(--tertiary) transparent',
+          display: "flex",
+          gap: "16px",
+          overflowX: "auto",
+          paddingBottom: "12px",
+          scrollbarWidth: "thin",
+          scrollbarColor: "var(--tertiary) transparent",
         }}
       >
-        {books.map(book => (
+        {books.map((book) => (
           <BookCard
             key={book.chapter_id}
             book={book}
