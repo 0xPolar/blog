@@ -28,11 +28,6 @@ interface Props {
 export default function BookModal({ book, onClose, showReadingProgress = false }: Props) {
   const author = getAuthor(book);
   const title = cleanTitle(book.title);
-  const lastRead = new Date(book.last_read_utc).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
   const hasRelease = !book.release_date.startsWith('0001');
   const releaseYear = hasRelease ? new Date(book.release_date).getFullYear() : null;
 
@@ -160,10 +155,6 @@ export default function BookModal({ book, onClose, showReadingProgress = false }
               </div>
             </div>
           )}
-
-          <p style={{ color: 'var(--secondary)', fontSize: '12px', margin: 0 }}>
-            Last read {lastRead}
-          </p>
         </div>
       </div>
     </div>
