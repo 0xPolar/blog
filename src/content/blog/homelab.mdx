@@ -1,7 +1,16 @@
 ---
-title: "How flipping an LXC container from unpriviled to priviliged amlost broke everything"
+title: "Building a Production-Like Homelab for Backend Engineering"
 description: ""
 pubDate: "Feb 15 2026"
 ---
 
-# [WIP]
+import Callout from "@components/Callout.astro";
+
+<Callout type="tldr">
+Self-hosting looks like a hobby from the outside, but it has probably taught me more about running backend systems than most toy projects.
+
+A local API project can teach routing, database queries and clean code structure, but it usually stops at the point where the app works on your machine. My homelab forced me to deal with the parts around the application: DNS, reverse proxies, tunnels, persistent storage, container networking, secrets, permissions, background jobs and debugging when the problem is not obvious.
+
+This post is about what I built, what broke, and why I think self-hosting is a useful way to learn backend engineering.
+
+</Callout>
