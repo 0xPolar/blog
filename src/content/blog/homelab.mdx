@@ -14,3 +14,9 @@ A local API project can teach routing, database queries and clean code structure
 This post is about what I built, what broke, and why I think self-hosting is a useful way to learn backend engineering.
 
 </Callout>
+
+My homelab initially started as a way to host a few small services at home, but it ended up teaching me a lot about backend engineering.
+
+Most backend projects are clean when they only run locally. The API starts, the database is reachable, the environment variables are in one place, and if something breaks it is usually a code problem. A homelab is not that clean.
+
+A service can be running but still unreachable. DNS can point at the wrong place. A reverse proxy can route to the wrong port. A Docker volume can exist but have the wrong permissions. A tunnel can be healthy while the upstream service is dead. GPU transcoding can work on the host but fail inside a container.
