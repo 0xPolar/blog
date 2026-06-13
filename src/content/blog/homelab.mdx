@@ -26,3 +26,7 @@ My setup is built around Proxmox, LXC containers, Docker Compose, Pi-hole, Cloud
 ## The Problem
 
 When i started building backend projects most of them lived in clean environments: a local API, a test database, and maybe a staging server. The code was the main focus, and if something broke it was usually a code problem. This is a great way to learn the basics of backend development, but it doesn't prepare you for the complexities of running real services. In a production-like environment, there are many more moving parts: DNS, reverse proxies, tunnels, persistent storage, container networking, secrets management, permissions, background jobs, and more. These are the things that can break in ways that are not immediately obvious, and they are the things that you need to understand if you want to run real services.
+
+## Networking
+
+Networking was the part of self hosting that felt most like backend engineering. I split service access into three categories: docker, local, private, and public. Docker services are only accessible from other containers on the same network. Local services are only accessible from the LAN and are not exposed to the internet. Private services are things that i want to be able to reach from outside of the network but not exposed publicly, Tailscale works well for this as it gives me access to my private network without having to open ports on my router.
