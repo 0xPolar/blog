@@ -34,3 +34,27 @@ Networking was the part of self hosting that felt most like backend engineering.
 ## DNS
 
 DNS was one of the last things i set up, initially i was just using static IP addresses to reach my services, this worked as long as the IP addresses didn't change, but it was not a scalable solution. I set up Pi-hole as my DNS server, which allows me to use hostnames instead of IP addresses to reach my services. This makes it much easier to manage and remember the addresses of my services, and it also allows me to easily change the IP addresses of my services without having to update all of my clients.
+
+## Background Workers
+
+My media processing stack behaves a lot like a backend system, with background workers that process media files and update the database. I have a few different background workers that handle different tasks: transcoding media files, downloading metadata, and updating the database. These workers run in the background and are triggered by events, such as a new media file being added to the library. This setup allows me to offload processing tasks from the main application and keep the system responsive.
+
+My faviroute example of this is my Tdarr setup. Tdarr scans files, cerates jobs, sends them to workers and writes the output back to storage
+
+# ADD Component
+
+The most interesting part of setting up Tdarr was setting up GPU passthrough for transcoding. Adding GPU transcoding to a containerized environment was a challenge, but it was worth it for the performance gains. I had to make sure that the GPU was accessible from within the container and that the necessary drivers were installed.
+
+## Things tha broke
+
+The things that taught me the most about linux and self hosting were the things that broke. Some of the problems I ran into were:
+
+- Privleged containers: I had to learn about the security implications of running containers with elevated privileges and how to mitigate those risks.
+- Permissions: I had to learn about file permissions and how to set them correctly for my services
+- Networking: I had to learn about networking concepts and how to troubleshoot network issues in a containerized environment.
+- GPU passthrough: I had to learn about how to set up GPU passthrough for my containers and how to troubleshoot issues that arose from that setup.
+- DNS resolution: I had to learn about how DNS resolution works and how to troubleshoot issues that arose from misconfigured DNS settings.
+
+## Closing Thoughts
+
+The main thing self hosting taught me is that backend engineering is not just about writing code, it's about understanding the entire system and how all the pieces fit together. Running real services at home forced me to deal with the complexities of networking, storage, permissions, and more. It taught me how to troubleshoot issues that are not immediately obvious and how to think about the system as a whole. I highly recommend self-hosting as a way to learn backend engineering, as it provides a hands-on experience that is hard to replicate in a clean development environment.
