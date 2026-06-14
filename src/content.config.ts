@@ -27,9 +27,13 @@ const projectLinks = z
 		message: 'Projects must include at least one repo or demo link.',
 	});
 
+const projectImage = z.string().regex(/\.(png|jpe?g|webp|avif)$/i, {
+	message: 'Project images must reference a supported image filename.',
+});
+
 const projects = defineCollection({
 	loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
-	schema: ({ image }) =>
+	schema: () =>
 		z.object({
 			title: z.string(),
 			description: z.string(),
@@ -41,11 +45,11 @@ const projects = defineCollection({
 			role: z.string(),
 			stack: z.array(z.string()).min(1),
 			featured: z.boolean(),
-			heroImage: image(),
+			heroImage: projectImage,
 			screenshots: z
 				.array(
 					z.object({
-						image: image(),
+						image: projectImage,
 						alt: z.string().min(1),
 						caption: z.string().optional(),
 					}),

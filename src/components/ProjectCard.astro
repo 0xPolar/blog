@@ -1,0 +1,136 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+import { resolveProjectImage } from '../lib/projectImages';
+
+interface Props {
+	project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { title, description, pubDate, status, stack, heroImage, links } = project.data;
+const resolvedHeroImage = resolveProjectImage(heroImage);
+const statusLabel = status.replace('-', ' ');
+const projectLinks = [
+	{ label: 'Repo', href: links.repo },
+	{ label: 'Demo', href: links.demo },
+	{ label: 'Docs', href: links.docs },
+].filter((link): link is { label: string; href: string } => Boolean(link.href));
+---
+
+<article class="project-card">
+	<a class="media-link" href={`/projects/${project.id}/`} aria-label={title}>
+		<Image class="project-image" src={resolvedHeroImage} alt="" width={720} height={405} />
+	</a>
+	<div class="project-body">
+		<div class="project-meta">
+			<span class="status">{statusLabel}</span>
+			<span aria-hidden="true">·</span>
+			<FormattedDate date={pubDate} />
+		</div>
+		<h2 class="project-title">
+			<a href={`/projects/${project.id}/`}>{title}</a>
+		</h2>
+		<p class="project-description">{description}</p>
+		<ul class="stack-list" aria-label="Project stack">
+			{stack.map((item) => <li>{item}</li>)}
+		</ul>
+		<ul class="project-links" aria-label="Project links">
+			{projectLinks.map((link) => (
+				<li><a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a></li>
+			))}
+		</ul>
+	</div>
+</article>
+
+<style>
+	.project-card {
+		overflow: hidden;
+		background: var(--entry);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		transition:
+			transform 0.2s,
+			border-color 0.2s;
+	}
+	.project-card:hover {
+		transform: translateY(-2px);
+		border-color: var(--tertiary);
+	}
+	.media-link {
+		display: block;
+		background: var(--code-bg);
+	}
+	.project-image {
+		display: block;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		height: auto;
+		object-fit: cover;
+	}
+	.project-body {
+		padding: 18px;
+	}
+	.project-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		color: var(--secondary);
+		font-size: 13px;
+	}
+	.status {
+		text-transform: capitalize;
+	}
+	.project-title {
+		margin: 8px 0;
+		color: var(--primary);
+		font-size: 22px;
+		font-weight: 700;
+		line-height: 1.3;
+	}
+	.project-title a {
+		text-decoration: none;
+	}
+	.project-description {
+		display: -webkit-box;
+		margin: 8px 0 14px;
+		overflow: hidden;
+		color: var(--secondary);
+		font-size: 14px;
+		line-height: 1.6;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+	}
+	.stack-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.stack-list li {
+		padding: 3px 8px;
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		color: var(--secondary);
+		font-size: 12px;
+		line-height: 1.4;
+	}
+	.project-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin: 14px 0 0;
+		padding: 0;
+		list-style: none;
+		font-size: 13px;
+	}
+	.project-links a {
+		color: var(--primary);
+		text-decoration: underline;
+		text-underline-offset: 0.2rem;
+	}
+</style>

@@ -1,0 +1,132 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+const projects = (await getCollection('projects')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const featuredProjects = projects.filter((project) => project.data.featured);
+const otherProjects = projects.filter((project) => !project.data.featured);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Projects · ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main class="main">
+			<header class="page-header">
+				<h1>Projects</h1>
+				<p>
+					Deep dives into the systems I build: the problem, constraints,
+					architecture, tradeoffs, failures, and what I would change next.
+				</p>
+			</header>
+
+			{projects.length === 0 ? (
+				<section class="empty-state">
+					<h2>Project case studies are coming soon.</h2>
+					<p>
+						New project pages should use the publishing checklist in
+						<code>docs/project-template.md</code>.
+					</p>
+				</section>
+			) : (
+				<>
+					{featuredProjects.length > 0 && (
+						<section class="project-section" aria-labelledby="featured-projects">
+							<h2 id="featured-projects">Featured</h2>
+							<div class="project-grid">
+								{featuredProjects.map((project) => <ProjectCard project={project} />)}
+							</div>
+						</section>
+					)}
+
+					{otherProjects.length > 0 && (
+						<section class="project-section" aria-labelledby="all-projects">
+							<h2 id="all-projects">{featuredProjects.length > 0 ? 'More projects' : 'All projects'}</h2>
+							<div class="project-grid">
+								{otherProjects.map((project) => <ProjectCard project={project} />)}
+							</div>
+						</section>
+					)}
+				</>
+			)}
+		</main>
+		<Footer />
+
+		<style>
+			.main {
+				max-width: calc(var(--nav-width) + var(--gap) * 2);
+				margin: auto;
+				padding: var(--gap);
+			}
+			.page-header {
+				max-width: var(--main-width);
+				margin: 24px 0 32px;
+			}
+			.page-header h1 {
+				margin: 0 0 10px;
+				color: var(--primary);
+				font-size: 40px;
+				font-weight: 700;
+			}
+			.page-header p {
+				margin: 0;
+				color: var(--secondary);
+				font-size: 16px;
+				line-height: 1.6;
+			}
+			.project-section {
+				margin-top: 32px;
+			}
+			.project-section h2,
+			.empty-state h2 {
+				margin: 0 0 16px;
+				color: var(--primary);
+				font-size: 24px;
+				font-weight: 700;
+			}
+			.project-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: var(--gap);
+			}
+			.empty-state {
+				max-width: var(--main-width);
+				padding: var(--gap);
+				border: 1px solid var(--border);
+				border-radius: var(--radius);
+				background: var(--entry);
+			}
+			.empty-state p {
+				margin: 0;
+				color: var(--secondary);
+				font-size: 15px;
+				line-height: 1.6;
+			}
+			.empty-state code {
+				background: var(--code-bg);
+				border-radius: 4px;
+				padding: 0 4px;
+				font-family: var(--font-mono);
+			}
+
+			@media (max-width: 800px) {
+				.page-header h1 {
+					font-size: 32px;
+				}
+				.project-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</body>
+</html>

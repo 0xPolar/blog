@@ -1,0 +1,251 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Header from '../components/Header.astro';
+import { resolveProjectImage } from '../lib/projectImages';
+
+type Props = CollectionEntry<'projects'>['data'];
+
+const {
+	title,
+	description,
+	pubDate,
+	updatedDate,
+	startedDate,
+	completedDate,
+	status,
+	role,
+	stack,
+	heroImage,
+	screenshots,
+	links,
+} = Astro.props;
+
+const projectLinks = [
+	{ label: 'Repository', href: links.repo },
+	{ label: 'Demo', href: links.demo },
+	{ label: 'Docs', href: links.docs },
+].filter((link): link is { label: string; href: string } => Boolean(link.href));
+
+const resolvedHeroImage = resolveProjectImage(heroImage);
+const resolvedScreenshots = screenshots.map((screenshot) => ({
+	...screenshot,
+	image: resolveProjectImage(screenshot.image),
+}));
+const statusLabel = status.replace('-', ' ');
+---
+
+<html lang="en">
+	<head>
+		<BaseHead title={title} description={description} image={resolvedHeroImage} />
+	</head>
+	<body>
+		<Header />
+		<main class="main">
+			<article class="project-single">
+				<header class="project-header">
+					<p class="eyebrow">Project case study</p>
+					<h1 class="project-title">{title}</h1>
+					<p class="project-description">{description}</p>
+					<div class="project-meta">
+						<span class="status">{statusLabel}</span>
+						<span aria-hidden="true">&middot;</span>
+						<FormattedDate date={pubDate} />
+						{updatedDate && (
+							<>
+								<span aria-hidden="true">&middot;</span>
+								<span class="updated">Updated <FormattedDate date={updatedDate} /></span>
+							</>
+						)}
+					</div>
+				</header>
+
+				<Image class="project-cover" width={1020} height={574} src={resolvedHeroImage} alt="" />
+
+				<section class="project-brief" aria-label="Project details">
+					<div>
+						<h2>Role</h2>
+						<p>{role}</p>
+					</div>
+					<div>
+						<h2>Status</h2>
+						<p class="status">{statusLabel}</p>
+					</div>
+					<div>
+						<h2>Timeline</h2>
+						<p>
+							{startedDate && <FormattedDate date={startedDate} />}
+							{startedDate && completedDate && ' - '}
+							{completedDate && <FormattedDate date={completedDate} />}
+							{!startedDate && !completedDate && <FormattedDate date={pubDate} />}
+						</p>
+					</div>
+					<div>
+						<h2>Links</h2>
+						<ul class="project-links">
+							{projectLinks.map((link) => (
+								<li>
+									<a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				</section>
+
+				<ul class="stack-list" aria-label="Project stack">
+					{stack.map((item) => <li>{item}</li>)}
+				</ul>
+
+				<section class="screenshots" aria-label="Project screenshots">
+					{resolvedScreenshots.map((screenshot) => (
+						<figure>
+							<Image src={screenshot.image} alt={screenshot.alt} width={1020} height={574} />
+							{screenshot.caption && <figcaption>{screenshot.caption}</figcaption>}
+						</figure>
+					))}
+				</section>
+
+				<div class="post-content project-content">
+					<slot />
+				</div>
+			</article>
+		</main>
+		<Footer />
+
+		<style>
+			.main {
+				max-width: calc(1020px + var(--gap) * 2);
+				margin: auto;
+				padding: var(--gap);
+			}
+			.project-header {
+				max-width: var(--main-width);
+				margin: 24px auto 32px;
+			}
+			.eyebrow {
+				margin: 0 0 8px;
+				color: var(--secondary);
+				font-size: 13px;
+				font-weight: 700;
+				letter-spacing: 0;
+				text-transform: uppercase;
+			}
+			.project-title {
+				margin: 0 0 10px;
+				color: var(--primary);
+				font-size: 40px;
+				font-weight: 700;
+				line-height: 1.2;
+			}
+			.project-description {
+				margin: 10px 0;
+				color: var(--secondary);
+				font-size: 16px;
+			}
+			.project-meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				color: var(--secondary);
+				font-size: 14px;
+			}
+			.status {
+				text-transform: capitalize;
+			}
+			.updated {
+				font-style: italic;
+			}
+			.project-cover,
+			.screenshots img {
+				display: block;
+				width: 100%;
+				height: auto;
+				border-radius: var(--radius);
+			}
+			.project-cover {
+				margin: 20px 0;
+			}
+			.project-brief {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 12px;
+				margin: 24px 0 16px;
+			}
+			.project-brief > div {
+				padding: 14px;
+				border: 1px solid var(--border);
+				border-radius: var(--radius);
+				background: var(--entry);
+			}
+			.project-brief h2 {
+				margin: 0 0 6px;
+				color: var(--secondary);
+				font-size: 12px;
+				font-weight: 700;
+				text-transform: uppercase;
+			}
+			.project-brief p,
+			.project-links {
+				margin: 0;
+				color: var(--primary);
+				font-size: 14px;
+				line-height: 1.5;
+			}
+			.project-links {
+				padding: 0;
+				list-style: none;
+			}
+			.project-links a {
+				color: var(--primary);
+				text-decoration: underline;
+				text-underline-offset: 0.2rem;
+			}
+			.stack-list {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				margin: 0 0 24px;
+				padding: 0;
+				list-style: none;
+			}
+			.stack-list li {
+				padding: 3px 8px;
+				border: 1px solid var(--border);
+				border-radius: 4px;
+				color: var(--secondary);
+				font-size: 12px;
+				line-height: 1.4;
+			}
+			.screenshots {
+				display: grid;
+				gap: 18px;
+				margin: 24px 0 36px;
+			}
+			.screenshots figure {
+				margin: 0;
+			}
+			.screenshots figcaption {
+				margin-top: 8px;
+				color: var(--secondary);
+				font-size: 13px;
+				line-height: 1.5;
+			}
+			.project-content {
+				max-width: var(--main-width);
+				margin: 0 auto;
+			}
+
+			@media (max-width: 800px) {
+				.project-title {
+					font-size: 28px;
+				}
+				.project-brief {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</body>
+</html>

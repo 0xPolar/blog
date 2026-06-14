@@ -1,0 +1,22 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import ProjectPost from '../../layouts/ProjectPost.astro';
+import { renderProjectMarkdown } from '../../lib/projectMarkdown';
+
+export async function getStaticPaths() {
+	const projects = await getCollection('projects');
+	return projects.map((project) => ({
+		params: { slug: project.id },
+		props: project,
+	}));
+}
+
+type Props = CollectionEntry<'projects'>;
+
+const project = Astro.props;
+const renderedHtml = project.rendered?.html || renderProjectMarkdown(project.body ?? '');
+---
+
+<ProjectPost {...project.data}>
+	<Fragment set:html={renderedHtml} />
+</ProjectPost>
