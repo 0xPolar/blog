@@ -30,7 +30,7 @@ const booksJson = JSON.stringify(shelfBooks).replace(/</g, '\\u003c');
 
 {shelfBooks.length > 0 && (
   <section class="book-shelf" data-book-shelf data-show-progress={String(showReadingProgress)}>
-    <h2>Currently Reading</h2>
+    <h2>Reading</h2>
     <div class="book-list">
       {shelfBooks.map((book, index) => {
         const title = cleanTitle(book.title);

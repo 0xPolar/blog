@@ -33,7 +33,7 @@ export default function BookShelf({ showReadingProgress = false }: Props) {
           lineHeight: 1.2,
         }}
       >
-        Currently Reading
+        Reading
       </h2>
       <div
         style={{
