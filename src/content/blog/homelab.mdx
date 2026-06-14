@@ -5,6 +5,7 @@ pubDate: "Feb 15 2026"
 ---
 
 import Callout from "@components/Callout.astro";
+import AccessModel from "@components/homelab/AccessModel";
 import TdarrPipeline from "@components/homelab/TdarrPipeline";
 
 <Callout type="tldr">
@@ -60,6 +61,8 @@ I ended up treating service access as four different levels:
 - **Public access:** services that should be reachable from anywhere. For these,
   I use Cloudflare Tunnels so public traffic can reach the right internal
   service without exposing my router directly.
+
+<AccessModel client:visible />
 
 The important part is not the specific tools. It is having a clear access model.
 Once every service has a category, it becomes much easier to reason about what
