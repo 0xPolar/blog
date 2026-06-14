@@ -1,60 +1,152 @@
 ---
 title: "Building a Production-Like Homelab for Backend Engineering"
-description: ""
+description: "What self-hosting taught me about DNS, tunnels, workers, storage, permissions, and debugging backend systems outside the clean local-dev bubble."
 pubDate: "Feb 15 2026"
 ---
 
 import Callout from "@components/Callout.astro";
+import TdarrPipeline from "@components/homelab/TdarrPipeline";
 
 <Callout type="tldr">
-Self-hosting looks like a hobby from the outside, but it has probably taught me more about running backend systems than most toy projects.
-
-A local API project can teach routing, database queries and clean code structure, but it usually stops at the point where the app works on your machine. My homelab forced me to deal with the parts around the application: DNS, reverse proxies, tunnels, persistent storage, container networking, secrets, permissions, background jobs and debugging when the problem is not obvious.
-
-This post is about what I built, what broke, and why I think self-hosting is a useful way to learn backend engineering.
-
+  Self-hosting looks like a hobby from the outside, but my homelab has been one of
+  the best ways I have found to learn the parts of backend engineering that only
+  show up once software has to run somewhere real.
 </Callout>
 
-My homelab initially started as a way to host a few small services at home, but it ended up teaching me a lot about backend engineering.
+Most local backend projects are clean. The API starts, the database is reachable,
+the environment variables are in one place, and when something breaks it is
+usually a code problem.
 
-Most backend projects are clean when they only run locally. The API starts, the database is reachable, the environment variables are in one place, and if something breaks it is usually a code problem. A homelab is not that clean.
+My homelab is not that clean, and that is why it has been useful.
 
-A service can be running but still unreachable. DNS can point at the wrong place. A reverse proxy can route to the wrong port. A Docker volume can exist but have the wrong permissions. A tunnel can be healthy while the upstream service is dead. GPU transcoding can work on the host but fail inside a container.
+A service can be running but still unreachable. DNS can resolve to the wrong
+place. A reverse proxy can route to the wrong port. A Docker volume can exist but
+have the wrong permissions. A tunnel can be healthy while the service behind it
+is dead. GPU transcoding can work on the host and still fail inside a container.
 
-My setup is built around Proxmox, LXC containers, Docker Compose, Pi-hole, Cloudflare Tunnel, Tailscale, Portainer, Infisical, and a media/reading stack with Jellyfin, Tdarr, Sonarr, Radarr, qBittorrent, Prowlarr, Kavita and Calibre-Web-Automated. The individual services are not really the point. The interesting part is how they fit together: networking, storage, DNS, secrets, permissions, background workers, service boundaries and debugging across layers. This post is a quick look at what I built, what broke, and why running real services at home made backend systems feel much less abstract.
+That mess turned self-hosting from a collection of apps into a small
+production-like environment. The services themselves are not really the point.
+The interesting part is how they fit together: networking, storage, DNS, secrets,
+permissions, background workers, service boundaries, and debugging across layers.
 
 ## The Problem
 
-When i started building backend projects most of them lived in clean environments: a local API, a test database, and maybe a staging server. The code was the main focus, and if something broke it was usually a code problem. This is a great way to learn the basics of backend development, but it doesn't prepare you for the complexities of running real services. In a production-like environment, there are many more moving parts: DNS, reverse proxies, tunnels, persistent storage, container networking, secrets management, permissions, background jobs, and more. These are the things that can break in ways that are not immediately obvious, and they are the things that you need to understand if you want to run real services.
+When I started building backend projects, most of them lived in controlled
+environments: a local API, a test database, and maybe a staging deployment. That
+is a good way to learn routing, database access, and application structure, but
+it hides a lot of the work involved in running real services.
+
+In a homelab, the code is only one layer. A request might pass through DNS, a
+reverse proxy, a tunnel, an LXC container, a Docker network, a volume mount, and
+then the application. When something breaks, the bug might be in any of those
+layers.
+
+That is the backend lesson I did not get from toy projects: running a system is
+mostly about understanding the path between components and knowing where
+responsibility changes hands.
 
 ## Networking
 
-Networking was the part of self hosting that felt most like backend engineering. I split service access into three categories: docker, local, private, and public. Docker services are only accessible from other containers on the same network. Local services are only accessible from the LAN and are not exposed to the internet. Private services are things that i want to be able to reach from outside of the network but not exposed publicly, Tailscale works well for this as it gives me access to my private network without having to open ports on my router. Public services are things i want to be able to reach from anywhere, for this I use Cloudflare Tunnel's which allow me to expose services to the internet without having to open ports on my router. This setup allows me to have a clear separation of services and access levels, which is important for security and organization.
+Networking was the part of self-hosting that felt most like backend engineering.
+I ended up treating service access as four different levels:
+
+- **Docker-only:** services that only need to talk to other containers on the
+  same Docker network.
+- **LAN-only:** services I only want reachable from machines inside my home
+  network.
+- **Private remote access:** services I want to reach while away from home, but
+  not expose to the public internet. Tailscale works well for this because it
+  gives me private access without opening router ports.
+- **Public access:** services that should be reachable from anywhere. For these,
+  I use Cloudflare Tunnels so public traffic can reach the right internal
+  service without exposing my router directly.
+
+The important part is not the specific tools. It is having a clear access model.
+Once every service has a category, it becomes much easier to reason about what
+should be reachable, what should stay private, and where a broken request path
+might be failing.
 
 ## DNS
 
-DNS was one of the last things i set up, initially i was just using static IP addresses to reach my services, this worked as long as the IP addresses didn't change, but it was not a scalable solution. I set up Pi-hole as my DNS server, which allows me to use hostnames instead of IP addresses to reach my services. This makes it much easier to manage and remember the addresses of my services, and it also allows me to easily change the IP addresses of my services without having to update all of my clients.
+DNS was one of the last things I set up properly. At first I reached services by
+static IP addresses. That worked while the IPs stayed the same, but it was a
+fragile habit. It also made the system harder to understand because every client
+needed to remember where each service lived.
+
+Pi-hole gave me a small internal DNS layer. Instead of memorizing IP addresses, I
+could use hostnames for local services and update the target in one place when
+something moved.
+
+That sounds simple, but it changed how I debugged. Instead of asking "what IP is
+Jellyfin on today?", I could ask better questions: does the hostname resolve, is
+the reverse proxy pointing at the right upstream, and is the upstream service
+actually healthy?
 
 ## Background Workers
 
-My media processing stack behaves a lot like a backend system, with background workers that process media files and update the database. I have a few different background workers that handle different tasks: transcoding media files, downloading metadata, and updating the database. These workers run in the background and are triggered by events, such as a new media file being added to the library. This setup allows me to offload processing tasks from the main application and keep the system responsive.
+My media stack made background jobs feel much less abstract. Jellyfin is the app
+I interact with, but a lot of the useful work happens away from the request path:
+files are scanned, metadata is fetched, downloads finish, libraries refresh, and
+media gets transcoded into formats that are easier to stream.
 
-My faviroute example of this is my Tdarr setup. Tdarr scans files, cerates jobs, sends them to workers and writes the output back to storage
+Tdarr is my favorite example because it behaves like a backend worker system.
+It scans media files, creates jobs, sends those jobs to workers, uses the GPU for
+transcoding, and writes the result back to shared storage.
 
-# ADD Component
+<TdarrPipeline client:visible />
 
-The most interesting part of setting up Tdarr was setting up GPU passthrough for transcoding. Adding GPU transcoding to a containerized environment was a challenge, but it was worth it for the performance gains. I had to make sure that the GPU was accessible from within the container and that the necessary drivers were installed.
+The hard part was not understanding that GPU transcoding is faster. The hard
+part was making the GPU visible at the right layer. It had to work on the host,
+inside the container boundary, inside Docker, and inside the worker process. Any
+one of those layers could make the job fail even though the previous layer looked
+healthy.
 
-## Things tha broke
+That is very close to backend debugging in production. The queue can have work,
+the worker can be running, the input file can exist, and the job can still fail
+because one dependency is not available in the environment where the work
+actually happens.
 
-The things that taught me the most about linux and self hosting were the things that broke. Some of the problems I ran into were:
+## Things That Broke
 
-- Privleged containers: I had to learn about the security implications of running containers with elevated privileges and how to mitigate those risks.
-- Permissions: I had to learn about file permissions and how to set them correctly for my services
-- Networking: I had to learn about networking concepts and how to troubleshoot network issues in a containerized environment.
-- GPU passthrough: I had to learn about how to set up GPU passthrough for my containers and how to troubleshoot issues that arose from that setup.
-- DNS resolution: I had to learn about how DNS resolution works and how to troubleshoot issues that arose from misconfigured DNS settings.
+The things that taught me the most were the things that broke.
+
+**GPU passthrough made the container boundary obvious.** It was easy to think
+"the machine has a GPU" and assume the worker could use it. In practice, the
+host, LXC container, Docker container, drivers, device mounts, and worker config
+all had to agree. That taught me to debug capabilities from the inside out, not
+from the host down.
+
+**Storage permissions made Linux feel practical instead of theoretical.** A
+service could see the mount but still fail to read or write files. That pushed me
+to understand ownership, groups, UID/GID mapping, and why a volume mount is only
+useful if the process inside the container has the right permissions.
+
+**Privileged containers were tempting for the wrong reason.** When permissions or
+device access got annoying, running something with more privileges often made the
+problem disappear. It also made the security boundary weaker. That tradeoff made
+least privilege feel less like a slogan and more like a design constraint.
+
+**Networking failures were rarely just "the network."** Sometimes DNS was wrong.
+Sometimes the reverse proxy had the wrong upstream port. Sometimes the tunnel was
+healthy but the service behind it was down. The useful habit was tracing the
+request one hop at a time instead of treating reachability as one big mystery.
+
+**DNS resolution changed how I thought about service names.** Static IPs worked
+until they did not. Hostnames gave the lab a stable interface, which is the same
+reason service discovery matters in larger backend systems. Callers should not
+need to know where a service physically lives today.
 
 ## Closing Thoughts
 
-The main thing self hosting taught me is that backend engineering is not just about writing code, it's about understanding the entire system and how all the pieces fit together. Running real services at home forced me to deal with the complexities of networking, storage, permissions, and more. It taught me how to troubleshoot issues that are not immediately obvious and how to think about the system as a whole. I highly recommend self-hosting as a way to learn backend engineering, as it provides a hands-on experience that is hard to replicate in a clean development environment.
+The main thing self-hosting taught me is that backend engineering is not only
+about writing application code. It is about understanding the whole path a
+request, file, job, or secret takes through a system.
+
+Running services at home forced me to deal with the parts that clean local
+projects usually hide: DNS, proxies, tunnels, storage, permissions, background
+workers, and failure modes that are not obvious from the application logs alone.
+
+That is why I think a homelab is such a useful learning tool. It turns abstract
+backend concepts into real problems with real symptoms. You do not just learn
+what a worker is. You learn what happens when the worker is alive, the queue has
+jobs, the file exists, and the environment still cannot do the work.
