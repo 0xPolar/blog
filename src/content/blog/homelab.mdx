@@ -9,9 +9,9 @@ import AccessModel from "@components/homelab/AccessModel";
 import TdarrPipeline from "@components/homelab/TdarrPipeline";
 
 <Callout type="tldr">
-  Self-hosting looks like a hobby from the outside, but my homelab has been one of
-  the best ways I have found to learn the parts of backend engineering that only
-  show up once software has to run somewhere real.
+  Self-hosting looks like a hobby from the outside, but my homelab has been one
+  of the best ways I have found to learn the parts of backend engineering that
+  only show up once software has to run somewhere real.
 </Callout>
 
 Most local backend projects are clean. The API starts, the database is reachable,
@@ -62,7 +62,7 @@ I ended up treating service access as four different levels:
   I use Cloudflare Tunnels so public traffic can reach the right internal
   service without exposing my router directly.
 
-<AccessModel client:visible />
+<AccessModel client:load />
 
 The important part is not the specific tools. It is having a clear access model.
 Once every service has a category, it becomes much easier to reason about what
@@ -96,7 +96,7 @@ Tdarr is my favorite example because it behaves like a backend worker system.
 It scans media files, creates jobs, sends those jobs to workers, uses the GPU for
 transcoding, and writes the result back to shared storage.
 
-<TdarrPipeline client:visible />
+<TdarrPipeline client:load />
 
 The hard part was not understanding that GPU transcoding is faster. The hard
 part was making the GPU visible at the right layer. It had to work on the host,

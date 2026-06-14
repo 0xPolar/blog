@@ -86,6 +86,10 @@
 .post-content {
   color: var(--content);
 }
+.post-content astro-island {
+  display: block !important;
+  visibility: visible !important;
+}
 .post-content p,
 .post-content ul,
 .post-content ol {

@@ -7,6 +7,7 @@ export const SITE_DESCRIPTION = 'Notes on backend systems, databases, infrastruc
 export const NAV: { href: string; label: string }[] = [
 	{ href: '/', label: 'Home' },
 	{ href: '/blog/', label: 'Posts' },
+	{ href: '/projects/', label: 'Projects' },
 	{ href: '/about/', label: 'About' },
 ];
 
